@@ -26,21 +26,6 @@ function get_end_of_dscr_line_num() {
   echo "$END_OF_DESCRIPTION_LINE_NUM"
 }
 
-function is_valid_version_format() {
-  VERSION=$1
-
-  set +e
-  _=$(echo "$VERSION" | grep -E "$VERSION_REGEX$")
-  IS_INVALID=$?
-  set -e
-
-  if [ $IS_INVALID -gt 0 ]; then
-    echo 0
-  else
-    echo 1
-  fi
-}
-
 function get_next_version_line_num() {
   CHANGES_FILE=$1
   NEXT_VERSION_PLACEHOLDER=$2
