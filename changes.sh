@@ -136,7 +136,8 @@ NEXT_VERSION="$(read_next_version "$TEMP_FILE" "$SED_CMD" "$VERSION_REGEX" "$VER
 END_OF_DESCRIPTION_LINE_NUM="$(get_end_of_dscr_line_num "$TEMP_FILE" "$SED_CMD" "$VERSION_REGEX")"
 NEXT_VERSION_LINE_NUM="$(get_next_version_line_num "$TEMP_FILE" "$NEXT_VERSION_PLACEHOLDER" "$SED_CMD")"
 
-while [ -z "$(extract_description "$TEMP_FILE" "$END_OF_DESCRIPTION_LINE_NUM" "$NEXT_VERSION_LINE_NUM" "$NEXT_VERSION_PLACEHOLDER")" ]; do # <= checks description is filled or not
+DESCRIPTION="$(extract_description "$TEMP_FILE" "$END_OF_DESCRIPTION_LINE_NUM" "$NEXT_VERSION_LINE_NUM" "$NEXT_VERSION_PLACEHOLDER")"
+while [ -z "$DESCRIPTION" ]; do # <= checks description is filled or not
   info "No description for next version in file: '$TEMP_FILE'"
   read -r -p "Edit file? [Y/n (default: Y)]: " EDIT_FILE
   if [ -z "$EDIT_FILE" ]; then
@@ -154,10 +155,14 @@ while [ -z "$(extract_description "$TEMP_FILE" "$END_OF_DESCRIPTION_LINE_NUM" "$
 
   END_OF_DESCRIPTION_LINE_NUM="$(get_end_of_dscr_line_num "$TEMP_FILE" "$SED_CMD" "$VERSION_REGEX")"
   NEXT_VERSION_LINE_NUM="$(get_next_version_line_num "$TEMP_FILE" "$NEXT_VERSION_PLACEHOLDER" "$SED_CMD")"
+  DESCRIPTION="$(extract_description "$TEMP_FILE" "$END_OF_DESCRIPTION_LINE_NUM" "$NEXT_VERSION_LINE_NUM" "$NEXT_VERSION_PLACEHOLDER")"
 done
 
 RELEASE_TIME=$($DATE_CMD -u +"%Y-%m-%dT%H:%M:%SZ")
 $SED_CMD -i'' -e"s/$NEXT_VERSION_PLACEHOLDER/$NEXT_VERSION_PLACEHOLDER\n\n$NEXT_VERSION: $RELEASE_TIME/" "$TEMP_FILE"
 
 cp "$TEMP_FILE" "$CHANGES_FILE"
+
+echo "$NEXT_VERSION"
+echo -e "$DESCRIPTION"
 
