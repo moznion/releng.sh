@@ -2,10 +2,12 @@ use strict;
 use warnings;
 use utf8;
 
-use t::Util qw(setup_changes_file);
 use FindBin;
 use Test::More;
 use Capture::Tiny qw(capture);
+use lib "$FindBin::Bin/lib";
+
+use t::Util qw(setup_changes_file);
 
 my $changes_sh = "$FindBin::Bin/../changes.sh";
 
@@ -147,7 +149,7 @@ subtest 'Pass' => sub {
 
         like $stderr, qr/Given next version does not conform to the version format: __INVALID__/;
 
-        open my $fh, '<', $filename;
+        open $fh, '<', $filename;
         my $content = do { local $/; <$fh> };
         like $content, qr/^1[.]0[.]0: [0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/m;
     };
@@ -160,7 +162,7 @@ subtest 'Pass' => sub {
         my $status = system(qq{yes "" | $changes_sh $filename});
         is $status, 0;
 
-        open my $fh, '<', $filename;
+        open $fh, '<', $filename;
         my $content = do { local $/; <$fh> };
         like $content, qr/^0[.]0[.]1: [0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/m;
     };
@@ -173,7 +175,7 @@ subtest 'Pass' => sub {
         my $status = system(qq{echo "\n" | $changes_sh $filename 2.3.4});
         is $status, 0;
 
-        open my $fh, '<', $filename;
+        open $fh, '<', $filename;
         my $content = do { local $/; <$fh> };
         like $content, qr/^2[.]3[.]4: [0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$/m;
     };

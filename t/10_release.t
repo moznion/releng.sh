@@ -2,10 +2,12 @@ use strict;
 use warnings;
 use utf8;
 
-use t::Util qw(setup_changes_file);
 use FindBin;
 use Test::More;
 use Capture::Tiny qw(capture);
+use lib "$FindBin::Bin/lib";
+
+use t::Util qw(setup_changes_file);
 
 my $release_sh = "$FindBin::Bin/../release.sh";
 
