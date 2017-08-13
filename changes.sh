@@ -2,15 +2,19 @@
 
 set -eu
 
+PWD=$(cd "$(dirname "$0")";pwd)
+
 # shellcheck disable=SC1090,SC1091
-source "$(cd "$(dirname "$0")";pwd)/logger.sh"
+source "$PWD/logger.sh"
+# shellcheck disable=SC1090,SC1091
+source "$PWD/regex.sh"
 
 function get_default_next_version() {
   LATEST_VERSION="$1"
 
   DEFAULT_NEXT_VERSION='0.0.1'
   if [ -n "$LATEST_VERSION" ]; then
-    SEMANTIC_VERSION_SPLIT_REGEX='^\([vV]\?[0-9]\+[.][0-9]\+\)[.]\([0-9]\+\).\+'
+    SEMANTIC_VERSION_SPLIT_REGEX='^\([vV]\?[0-9]\+[.][0-9]\+\)[.]\([0-9]\+\)'
     MAJOR_MINOR=$(echo "$LATEST_VERSION" | $SED_CMD -e "s/$SEMANTIC_VERSION_SPLIT_REGEX/\1/")
     PATCH=$(echo "$LATEST_VERSION" | $SED_CMD -e "s/$SEMANTIC_VERSION_SPLIT_REGEX/\2/")
     DEFAULT_NEXT_VERSION="$MAJOR_MINOR.$(echo "$PATCH" | awk '{print $1 + 1}')"
@@ -22,7 +26,6 @@ function get_default_next_version() {
 function get_end_of_dscr_line_num() {
   CHANGES_FILE=$1
   SED_CMD=$2
-  VERSION_REGEX=$3
 
   END_OF_DESCRIPTION_LINE_NUM=$(grep -n -E "$VERSION_REGEX" "$CHANGES_FILE" | head -1 | $SED_CMD -e 's/:.*//g')
   if [ -n "$END_OF_DESCRIPTION_LINE_NUM" ]; then
@@ -36,7 +39,6 @@ function get_end_of_dscr_line_num() {
 
 function is_valid_version_format() {
   VERSION=$1
-  VERSION_REGEX=$2
 
   set +e
   _=$(echo "$VERSION" | grep -E "$VERSION_REGEX$")
@@ -53,15 +55,13 @@ function is_valid_version_format() {
 function read_next_version() {
   CHANGES_FILE=$1
   SED_CMD=$2
-  VERSION_REGEX=$3
-  VERSION_REGEX_FOR_SED=$4
-  NEXT_VERSION_VIA_CMD_ARG=$5
+  NEXT_VERSION_VIA_CMD_ARG=$3
 
   LATEST_VERSION=$(grep -E "$VERSION_REGEX" "$CHANGES_FILE" | head -1 | $SED_CMD -e "s/$VERSION_REGEX_FOR_SED/\1/")
   DEFAULT_NEXT_VERSION="$(get_default_next_version "$LATEST_VERSION")"
 
   if [ -n "$NEXT_VERSION_VIA_CMD_ARG" ]; then
-    if [ "$(is_valid_version_format "$NEXT_VERSION_VIA_CMD_ARG" "$VERSION_REGEX")" -ne 1 ]; then
+    if [ "$(is_valid_version_format "$NEXT_VERSION_VIA_CMD_ARG")" -ne 1 ]; then
       die "[ERROR] Given next version does not conform to the version format: $NEXT_VERSION_VIA_CMD_ARG"
     fi
     NEXT_VERSION="$NEXT_VERSION_VIA_CMD_ARG"
@@ -104,7 +104,7 @@ function extract_description() {
 
 ### Main
 
-if [ $# -lt 1 ]; then die "[ERROR] CHANGES file is not given\nUsage:\n\trelease.sh /path/to/Changes/file"; fi
+if [ $# -lt 1 ]; then die "[ERROR] CHANGES file is not given\nUsage:\n\tchanges.sh /path/to/Changes/file"; fi
 
 CHANGES_FILE="$1" # <= required
 if [ ! -e "$CHANGES_FILE" ]; then die '[ERROR] Given CHANGES file is not found'; fi
@@ -125,15 +125,13 @@ else
 fi
 
 NEXT_VERSION_PLACEHOLDER='%%NEXT_VERSION%%'
-VERSION_REGEX='^[vV]?[0-9]+[.][0-9]+[.][0-9]+'
-VERSION_REGEX_FOR_SED='^\([vV]\?[0-9]\+[.][0-9]\+[.][0-9]\+\).\+'
 
 # Use temporary file
 TEMP_FILE="$(mktemp)"
 cp "$CHANGES_FILE" "$TEMP_FILE"
 
-NEXT_VERSION="$(read_next_version "$TEMP_FILE" "$SED_CMD" "$VERSION_REGEX" "$VERSION_REGEX_FOR_SED", "$NEXT_VERSION_VIA_CMD_ARG")"
-END_OF_DESCRIPTION_LINE_NUM="$(get_end_of_dscr_line_num "$TEMP_FILE" "$SED_CMD" "$VERSION_REGEX")"
+NEXT_VERSION="$(read_next_version "$TEMP_FILE" "$SED_CMD" "$NEXT_VERSION_VIA_CMD_ARG")"
+END_OF_DESCRIPTION_LINE_NUM="$(get_end_of_dscr_line_num "$TEMP_FILE" "$SED_CMD")"
 NEXT_VERSION_LINE_NUM="$(get_next_version_line_num "$TEMP_FILE" "$NEXT_VERSION_PLACEHOLDER" "$SED_CMD")"
 
 DESCRIPTION="$(extract_description "$TEMP_FILE" "$END_OF_DESCRIPTION_LINE_NUM" "$NEXT_VERSION_LINE_NUM" "$NEXT_VERSION_PLACEHOLDER")"
@@ -153,7 +151,7 @@ while [ -z "$DESCRIPTION" ]; do # <= checks description is filled or not
 
   $EDITOR "$TEMP_FILE"
 
-  END_OF_DESCRIPTION_LINE_NUM="$(get_end_of_dscr_line_num "$TEMP_FILE" "$SED_CMD" "$VERSION_REGEX")"
+  END_OF_DESCRIPTION_LINE_NUM="$(get_end_of_dscr_line_num "$TEMP_FILE" "$SED_CMD")"
   NEXT_VERSION_LINE_NUM="$(get_next_version_line_num "$TEMP_FILE" "$NEXT_VERSION_PLACEHOLDER" "$SED_CMD")"
   DESCRIPTION="$(extract_description "$TEMP_FILE" "$END_OF_DESCRIPTION_LINE_NUM" "$NEXT_VERSION_LINE_NUM" "$NEXT_VERSION_PLACEHOLDER")"
 done
