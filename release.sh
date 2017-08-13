@@ -22,6 +22,10 @@ set +u
 if [ -z "$GITHUB_TOKEN" ]; then die "[ERROR] Environment variable '\$GITHUB_TOKEN' is not set, abort"; fi
 set -u
 
+if [ -n "$(git status -suno)" ]; then
+  die "[ERROR] Uncommitted files of git exists"
+fi
+
 NEXT_VERSION="$(read_next_version "$CHANGES_FILE" "$NEXT_VERSION_VIA_CMD_ARG")"
 
 "$PWD/changes.sh" "$CHANGES_FILE" "$NEXT_VERSION"
@@ -50,13 +54,14 @@ GIT_REMOTE_REGEX='.*github.com[/:]\([^/]\+\)\/\(.\+\)$'
 OWNER="$(echo "$REPO_URL" | $SED_CMD -e "s/$GIT_REMOTE_REGEX/\1/")"
 REPO="$(echo "$REPO_URL" | $SED_CMD -e "s/$GIT_REMOTE_REGEX/\2/" | $SED_CMD -e "s/\(.\+\)\([.]git\)$/\1/")"
 
+git commit "$CHANGES_FILE" -m "Releng: $NEXT_VERSION"
 git tag "$NEXT_VERSION"
 git push origin "$NEXT_VERSION"
 
 JSON=$(cat << EOS
 {
   "tag_name": "$NEXT_VERSION",
-  "target_commitish": "$NEXT_VERSION",
+  "target_commitish": "master",
   "name": "$NEXT_VERSION",
   "body": "$DESCRIPTION",
   "draft": false,
