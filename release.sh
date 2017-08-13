@@ -9,6 +9,24 @@ source "$PWD/logger.sh"
 # shellcheck disable=SC1090,SC1091
 source "$PWD/util.sh"
 
+set +u
+if [ "$1" == "--init" ]; then
+  PROJECT_NAME="$2"
+  CHANGES_FILE="$3"
+  if [ -z "$PROJECT_NAME" ] || [ -z "$CHANGES_FILE" ]; then
+    die "[ERROR] Failed to initialize because description is missing\nUsage example:\n\trelease.sh --init 'YOUR-PROJECT-NAME' '/path/to/Changes/file'"
+  fi
+  cat <<EOS > "$CHANGES_FILE"
+Revision history for $PROJECT_NAME
+
+%%NEXT_VERSION%%
+
+EOS
+  info 'Initialized!'
+  exit 0
+fi
+set -u
+
 if [ $# -lt 1 ]; then die "[ERROR] CHANGES file is not given\nUsage:\n\trelease.sh /path/to/Changes/file"; fi
 
 CHANGES_FILE="$1" # <= required
