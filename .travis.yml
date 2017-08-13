@@ -1,7 +1,9 @@
 language: perl
-sudo: false
-script: prove t/
+before_install:
+    - sudo apt-get install shellcheck
+script:
+    - prove --verbose --lib --recurse --color t/
+    - shellcheck *.sh
 perl:
   - "5.26"
-
 
