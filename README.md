@@ -1,4 +1,4 @@
-releng.sh
+releng.sh [![Build Status](https://travis-ci.org/moznion/releng.sh.svg?branch=master)](https://travis-ci.org/moznion/releng.sh)
 ==
 
 Release engineering bash scripts.

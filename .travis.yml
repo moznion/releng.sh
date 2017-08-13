@@ -1,0 +1,6 @@
+language: perl
+sudo: false
+perl:
+  - "5.26"
+
+

@@ -1,0 +1,22 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use utf8;
+
+my $meth = shift;
+my $header_opt = shift;
+my $auth_header = shift;
+my $data_opt = shift;
+my $json = shift;
+my $url = shift;
+
+print <<"EOS"
+$meth
+$header_opt
+$auth_header
+$data_opt
+$json
+$url
+EOS
+

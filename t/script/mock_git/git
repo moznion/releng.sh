@@ -1,0 +1,72 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use utf8;
+
+my $subcmd = shift or die;
+
+if ($subcmd eq 'status') {
+    exit 0;
+}
+
+if ($subcmd eq 'remote') {
+    my $arg1 = shift;
+    my $arg2 = shift;
+    if ($arg1 eq 'show' && $arg2 eq 'origin') {
+        print <<'EOS';
+* remote origin
+  Fetch URL: git@github.com:moznion/releng.sh.git
+  Push  URL: git@github.com:moznion/releng.sh.git
+  HEAD branch: master
+  Remote branch:
+    master tracked
+  Local branch configured for 'git pull':
+    master merges with remote master
+  Local ref configured for 'git push':
+    master pushes to master (up to date)
+EOS
+        exit 0;
+    }
+    die;
+}
+
+if ($subcmd eq 'commit') {
+    my $file = shift or die;
+    my $opt = shift;
+    if ($opt ne '-m') {
+        die;
+    }
+
+    my $msg = shift;
+    if ($msg !~ /\AReleng: [vV]?[0-9]+[.][0-9]+[.][0-9]+\Z/) {
+        die;
+    }
+
+    exit 0;
+}
+
+if ($subcmd eq 'tag') {
+    my $tag = shift;
+    if ($tag !~ /\A[vV]?[0-9]+[.][0-9]+[.][0-9]+\Z/) {
+        die;
+    }
+    exit 0;
+}
+
+if ($subcmd eq 'push') {
+    my $dst = shift;
+    if ($dst ne 'origin') {
+        die;
+    }
+
+    my $tag = shift;
+    if ($tag !~ /\A[vV]?[0-9]+[.][0-9]+[.][0-9]+\Z/) {
+        die;
+    }
+
+    exit 0;
+}
+
+exit 0;
+

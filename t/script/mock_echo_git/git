@@ -1,0 +1,10 @@
+#!/usr/bin/env perl
+
+# THIS IS MOCK!!!!!
+
+use strict;
+use warnings;
+use utf8;
+
+print "@ARGV";
+
