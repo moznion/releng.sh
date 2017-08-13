@@ -9,12 +9,27 @@ source "$PWD/regex.sh"
 # shellcheck disable=SC1090,SC1091
 source "$PWD/command.sh"
 
+function _get_default_next_version() {
+  LATEST_VERSION="$1"
+
+  DEFAULT_NEXT_VERSION='0.0.1'
+  if [ -n "$LATEST_VERSION" ]; then
+    SEMANTIC_VERSION_SPLIT_REGEX='^\([vV]\?[0-9]\+[.][0-9]\+\)[.]\([0-9]\+\)'
+    MAJOR_MINOR=$(echo "$LATEST_VERSION" | $SED_CMD -e "s/$SEMANTIC_VERSION_SPLIT_REGEX/\1/")
+    PATCH=$(echo "$LATEST_VERSION" | $SED_CMD -e "s/$SEMANTIC_VERSION_SPLIT_REGEX/\2/")
+    DEFAULT_NEXT_VERSION="$MAJOR_MINOR.$(echo "$PATCH" | awk '{print $1 + 1}')"
+  fi
+
+  echo "$DEFAULT_NEXT_VERSION"
+}
+
+
 function read_next_version() {
   CHANGES_FILE=$1
   NEXT_VERSION_VIA_CMD_ARG=$2
 
   LATEST_VERSION=$(grep -E "$VERSION_REGEX" "$CHANGES_FILE" | head -1 | $SED_CMD -e "s/$VERSION_REGEX_FOR_SED/\1/")
-  DEFAULT_NEXT_VERSION="$(get_default_next_version "$LATEST_VERSION")"
+  DEFAULT_NEXT_VERSION="$(_get_default_next_version "$LATEST_VERSION")"
 
   if [ -n "$NEXT_VERSION_VIA_CMD_ARG" ]; then
     if [ "$(is_valid_version_format "$NEXT_VERSION_VIA_CMD_ARG")" -ne 1 ]; then

@@ -13,20 +13,6 @@ source "$PWD/util.sh"
 # shellcheck disable=SC1090,SC1091
 source "$PWD/command.sh"
 
-function get_default_next_version() {
-  LATEST_VERSION="$1"
-
-  DEFAULT_NEXT_VERSION='0.0.1'
-  if [ -n "$LATEST_VERSION" ]; then
-    SEMANTIC_VERSION_SPLIT_REGEX='^\([vV]\?[0-9]\+[.][0-9]\+\)[.]\([0-9]\+\)'
-    MAJOR_MINOR=$(echo "$LATEST_VERSION" | $SED_CMD -e "s/$SEMANTIC_VERSION_SPLIT_REGEX/\1/")
-    PATCH=$(echo "$LATEST_VERSION" | $SED_CMD -e "s/$SEMANTIC_VERSION_SPLIT_REGEX/\2/")
-    DEFAULT_NEXT_VERSION="$MAJOR_MINOR.$(echo "$PATCH" | awk '{print $1 + 1}')"
-  fi
-
-  echo "$DEFAULT_NEXT_VERSION"
-}
-
 function get_end_of_dscr_line_num() {
   CHANGES_FILE=$1
 
@@ -119,6 +105,5 @@ $SED_CMD -i'' -e"s/$NEXT_VERSION_PLACEHOLDER/$NEXT_VERSION_PLACEHOLDER\n\n$NEXT_
 
 cp "$TEMP_FILE" "$CHANGES_FILE"
 
-echo "$NEXT_VERSION"
 echo -e "$DESCRIPTION"
 
