@@ -2,10 +2,16 @@
 
 set -eu
 
+# shellcheck disable=SC1090,SC1091
+source "$PWD/logger.sh"
+# shellcheck disable=SC1090,SC1091
+source "$PWD/regex.sh"
+# shellcheck disable=SC1090,SC1091
+source "$PWD/command.sh"
+
 function read_next_version() {
   CHANGES_FILE=$1
-  SED_CMD=$2
-  NEXT_VERSION_VIA_CMD_ARG=$3
+  NEXT_VERSION_VIA_CMD_ARG=$2
 
   LATEST_VERSION=$(grep -E "$VERSION_REGEX" "$CHANGES_FILE" | head -1 | $SED_CMD -e "s/$VERSION_REGEX_FOR_SED/\1/")
   DEFAULT_NEXT_VERSION="$(get_default_next_version "$LATEST_VERSION")"

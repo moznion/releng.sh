@@ -29,7 +29,6 @@ function get_default_next_version() {
 
 function get_end_of_dscr_line_num() {
   CHANGES_FILE=$1
-  SED_CMD=$2
 
   END_OF_DESCRIPTION_LINE_NUM=$(grep -n -E "$VERSION_REGEX" "$CHANGES_FILE" | head -1 | $SED_CMD -e 's/:.*//g')
   if [ -n "$END_OF_DESCRIPTION_LINE_NUM" ]; then
@@ -59,7 +58,6 @@ function is_valid_version_format() {
 function get_next_version_line_num() {
   CHANGES_FILE=$1
   NEXT_VERSION_PLACEHOLDER=$2
-  SED_CMD=$3
 
   grep -n "$NEXT_VERSION_PLACEHOLDER" "$CHANGES_FILE" | head -1 | $SED_CMD -e 's/:.*//g'
 }
@@ -90,9 +88,9 @@ NEXT_VERSION_PLACEHOLDER='%%NEXT_VERSION%%'
 TEMP_FILE="$(mktemp)"
 cp "$CHANGES_FILE" "$TEMP_FILE"
 
-NEXT_VERSION="$(read_next_version "$TEMP_FILE" "$SED_CMD" "$NEXT_VERSION_VIA_CMD_ARG")"
-END_OF_DESCRIPTION_LINE_NUM="$(get_end_of_dscr_line_num "$TEMP_FILE" "$SED_CMD")"
-NEXT_VERSION_LINE_NUM="$(get_next_version_line_num "$TEMP_FILE" "$NEXT_VERSION_PLACEHOLDER" "$SED_CMD")"
+NEXT_VERSION="$(read_next_version "$TEMP_FILE" "$NEXT_VERSION_VIA_CMD_ARG")"
+END_OF_DESCRIPTION_LINE_NUM="$(get_end_of_dscr_line_num "$TEMP_FILE")"
+NEXT_VERSION_LINE_NUM="$(get_next_version_line_num "$TEMP_FILE" "$NEXT_VERSION_PLACEHOLDER")"
 
 DESCRIPTION="$(extract_description "$TEMP_FILE" "$END_OF_DESCRIPTION_LINE_NUM" "$NEXT_VERSION_LINE_NUM" "$NEXT_VERSION_PLACEHOLDER")"
 while [ -z "$DESCRIPTION" ]; do # <= checks description is filled or not
@@ -111,8 +109,8 @@ while [ -z "$DESCRIPTION" ]; do # <= checks description is filled or not
 
   $EDITOR "$TEMP_FILE"
 
-  END_OF_DESCRIPTION_LINE_NUM="$(get_end_of_dscr_line_num "$TEMP_FILE" "$SED_CMD")"
-  NEXT_VERSION_LINE_NUM="$(get_next_version_line_num "$TEMP_FILE" "$NEXT_VERSION_PLACEHOLDER" "$SED_CMD")"
+  END_OF_DESCRIPTION_LINE_NUM="$(get_end_of_dscr_line_num "$TEMP_FILE")"
+  NEXT_VERSION_LINE_NUM="$(get_next_version_line_num "$TEMP_FILE" "$NEXT_VERSION_PLACEHOLDER")"
   DESCRIPTION="$(extract_description "$TEMP_FILE" "$END_OF_DESCRIPTION_LINE_NUM" "$NEXT_VERSION_LINE_NUM" "$NEXT_VERSION_PLACEHOLDER")"
 done
 
