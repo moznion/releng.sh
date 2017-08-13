@@ -72,6 +72,22 @@ Requires
 - GNU sed
 - GNU data
 
+For Developers
+--
+
+### Run tests
+
+```sh
+$ cpanm -n Carton
+$ carton install
+$ carton exec -- prove t/
+```
+
+#### Ref
+
+- [https://github.com/miyagawa/cpanminus](https://github.com/miyagawa/cpanminus)
+- [https://github.com/perl-carton/carton](https://github.com/perl-carton/carton)
+
 License
 --
 
