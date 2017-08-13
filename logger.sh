@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -eu
+
 function die() {
   # Decorate string (make it red) and pass that to STDERR, after exit
   echo -e "\033[0;31m$*\033[m" >&2
