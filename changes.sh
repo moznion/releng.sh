@@ -10,6 +10,8 @@ source "$PWD/logger.sh"
 source "$PWD/regex.sh"
 # shellcheck disable=SC1090,SC1091
 source "$PWD/util.sh"
+# shellcheck disable=SC1090,SC1091
+source "$PWD/command.sh"
 
 function get_default_next_version() {
   LATEST_VERSION="$1"
@@ -81,17 +83,6 @@ if [ ! -e "$CHANGES_FILE" ]; then die '[ERROR] Given CHANGES file is not found';
 set +u
 NEXT_VERSION_VIA_CMD_ARG="$2" # <= optional
 set -u
-
-# Normalize sed and date command
-SED_CMD=''
-DATE_CMD=''
-if [[ $OSTYPE =~ 'darwin' ]]; then
-  SED_CMD="$(which gsed)" || die '[ERROR] gsed command is not installed'
-  DATE_CMD="$(which gdate)" || die '[ERROR] gdate command is not installed'
-else
-  SED_CMD="$(which sed)" || die '[ERROR] sed command is not installed'
-  DATE_CMD="$(which date)" || die '[ERROR] date command is not installed'
-fi
 
 NEXT_VERSION_PLACEHOLDER='%%NEXT_VERSION%%'
 
